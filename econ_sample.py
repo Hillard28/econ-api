@@ -6,7 +6,7 @@ import econ_api
 
 """FRED sample commands"""
 # Create FRED object
-fred = econ_api.Fred("!!!Use FRED API key")
+fred = econ_api.Fred("!!!Get FRED API key!!!")
 
 # Search FRED for effective federal funds rate time series
 search = fred.search_series(search_text="treasury constant maturity rate")
@@ -125,17 +125,17 @@ fig.write_html("images/united_states_treasury_yields_interactive.html", auto_ope
 """Census sample commands"""
 # Create census object
 # census = census_api.Census('!!!use Census API key here!!!')
-census = econ_api.Census('!!!Use Census API key!!!')
+census = econ_api.Census("!!!Optional: get Census API key!!!")
 
 # Create dictionary
-dict_acs5 = census.get_dict(source = 'acs5', year = '2019')
+dict_acs5 = census.get_dict(source="acs5", year="2019")
 
 # Creates acs datasets
 acs2019 = census.get_data(
-    source = 'acs5',
-    year = '2019',
-    variables = ['B03001_003E', 'NAME'],
-    geographical_level = 'county',
+    source="acs5",
+    year="2019",
+    variables=["B03001_003E", "NAME"],
+    geographical_level="county",
 )
 
 # Create dataframe
@@ -143,4 +143,4 @@ df_acs2019 = pd.DataFrame(acs2019)
 df_acs2019["B03001_003E"] = pd.to_numeric(df_acs2019["B03001_003E"], errors="coerce")
 df_acs2019[df_acs2019["B03001_003E"] < 0] = pd.NA
 
-df_acs2019['FIPS'] = df_acs2019['state'] + df_acs2019['county']
+df_acs2019["FIPS"] = df_acs2019["state"] + df_acs2019["county"]
