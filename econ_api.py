@@ -152,99 +152,78 @@ class Fred(object):
         request = requests.get(url).json()
 
         data = []
-               
+
         for item in request["observations"]:
             observation = {}
             observation["id"] = series_id
             observation["date"] = item["date"]
             observation["value"] = item["value"]
             data.append(observation)
-
         return data
 
 
-
 class Census(object):
-    
-    # Set root URL for making queries
-    root_url = 'https://api.census.gov/data/'
-    
-    # Create census object and assign API key
+
+    root_url = "https://api.census.gov/data/"
+
     def __init__(self, key=None):
         self.key = None
         if key is not None:
             self.key = str(key)
         if self.key is None:
-            print('You will be limited to 500 queries per IP address')
+            print("You will be limited to 500 queries per IP address")
         elif len(self.key) < 32:
-            print('You may not have entered a valid API key')
-    
-    # Pulls all variable names from survey with descriptions
-    def get_dict(self, source = 'acs1', year = 2019):
-        # Set directory based on ACS survey selected
-        if 'acs' in source:
-            src = year + '/acs/' + source
-        elif 'sf' in source:
-            src = year + '/dec/' + source
+            print("You may not have entered a valid API key")
+
+    def get_dict(self, source="acs1", year=2019):
+        if "acs" in source:
+            src = year + "/acs/" + source
+        elif "sf" in source:
+            src = year + "/dec/" + source
         else:
-            src = year + '/' + source
-        
-        # Construct query URL
-        url = self.root_url + src + '/variables.json'
-        
-        # Pull data and convert to dataframe
+            src = year + "/" + source
+        url = self.root_url + src + "/variables.json"
+
         request = requests.get(url).json()
-        
-        data = request['variables']
-        
+
+        data = request["variables"]
+
         return data
-    
-    # Request Census data
-    def get_data(self,
-                 source = 'acs1',
-                 year = 2019,
-                 variables = '',
-                 geographical_level = '',
-                 geographies = '',
-                 all = True):
-        
-        # Set directory based on year and ACS survey selected
-        if 'acs' in source:
-            src = year + '/acs/' + source + '?'
-        elif 'sf' in source:
-            src = year + '/dec/' + source + '?'
+
+    def get_data(
+        self,
+        source="acs1",
+        year=2019,
+        variables="",
+        geographical_level="",
+        geographies="",
+    ):
+
+        if "acs" in source:
+            src = year + "/acs/" + source + "?"
+        elif "sf" in source:
+            src = year + "/dec/" + source + "?"
         else:
-            src = year + '/' + source + '?'
-        # If variables input as list, break into comma-delimited string
+            src = year + "/" + source + "?"
         if type(variables) is list or type(variables) is tuple:
-            var = 'get=' + ','.join(variables)
+            var = "get=" + ",".join(variables)
         else:
-            var = 'get=' + variables
-        # Calculate number of variables
-        var_cnt = var.count(',') + 1
-        # Replace spaces in geographic scope
-        geographical_level = geographical_level.replace(' ', '%20')
-        # Enter geographic scope and target subset
-        if all == False:
-            geo = 'for=' + geographical_level + ':' + geographies
+            var = "get=" + variables
+        geographical_level = geographical_level.replace(" ", "%20")
+        if geographies != "":
+            geo = "for=" + geographical_level + ":" + geographies
         else:
-            geo = 'for=' + geographical_level + ':*'
-        # Construct URL for query
+            geo = "for=" + geographical_level + ":*"
         if self.key is not None:
-            url = self.root_url + src + var + '&' + geo + '&key=' + self.key
+            url = self.root_url + src + var + "&" + geo + "&key=" + self.key
         else:
-            url = self.root_url + src + var + '&' + geo
-        
-        # Send request and convert data to dataframe format
+            url = self.root_url + src + var + "&" + geo
         request = requests.get(url).json()
-        
+
         data = []
         for entry in request[1:]:
             observation = {}
             for entry1, entry2 in zip(request[0], entry):
                 observation[entry1] = entry2
             data.append(observation)
-        
-        
-        
         return data
