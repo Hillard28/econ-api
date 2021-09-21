@@ -124,7 +124,6 @@ fig.write_html("images/united_states_treasury_yields_interactive.html", auto_ope
 
 """Census sample commands"""
 # Create census object
-# census = census_api.Census('!!!use Census API key here!!!')
 census = econ_api.Census("!!!Optional: get Census API key!!!")
 
 # Create dictionary
@@ -144,3 +143,21 @@ df_acs2019["B03001_003E"] = pd.to_numeric(df_acs2019["B03001_003E"], errors="coe
 df_acs2019[df_acs2019["B03001_003E"] < 0] = pd.NA
 
 df_acs2019["FIPS"] = df_acs2019["state"] + df_acs2019["county"]
+
+
+"""Alpha Vantage sample commands"""
+av = econ_api.AlphaVantage("!!!Get Alpha Vantage API key!!!")
+
+aapl = av.get_observations(
+    symbol="AAPL",
+    period="daily",
+    outputsize="full",
+)
+
+aapl = pd.DataFrame(aapl)
+aapl["date"] = pd.to_datetime(aapl["date"])
+aapl["open"] = pd.to_numeric(aapl["open"], errors="coerce")
+aapl["high"] = pd.to_numeric(aapl["high"], errors="coerce")
+aapl["low"] = pd.to_numeric(aapl["low"], errors="coerce")
+aapl["close"] = pd.to_numeric(aapl["close"], errors="coerce")
+aapl["volume"] = pd.to_numeric(aapl["volume"], errors="coerce")
