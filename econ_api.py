@@ -227,3 +227,85 @@ class Census(object):
                 observation[entry1] = entry2
             data.append(observation)
         return data
+
+
+class AlphaVantage(object):
+
+    root_url = "https://www.alphavantage.co/query?"
+
+    def __init__(self, api_key=None):
+        """Set key used to access Alpha Vantage API"""
+        self.api_key = None
+        if api_key is not None:
+            self.api_key = str(api_key)
+        if self.api_key is None:
+            raise ValueError("Please enter an API key")
+        elif len(self.api_key) < 16:
+            raise ValueError("Please enter a valid API key")
+
+    def get_observations(
+        self,
+        symbol,
+        period,
+        interval="",
+        adjusted=False,
+        extended=False,
+        **kwargs
+    ):
+        if period.lower() == "monthly":
+            if adjusted == False:
+                function = "MONTHLY"
+            elif adjusted == True:
+                function = "MONTHLY_ADJUSTED"
+        elif period.lower() == "weekly":
+            if adjusted == False:
+                function = "WEEKLY"
+            elif adjusted == True:
+                function = "WEEKLY_ADJUSTED"
+        elif period.lower() == "daily":
+            if adjusted == False:
+                function = "DAILY"
+            elif adjusted == True:
+                function = "DAILY_ADJUSTED"
+        elif period.lower() == "intraday":
+            if extended == False and interval != "":
+                function = "INTRADAY&interval=" + interval
+            elif extended == True and interval != "":
+                function = "INTRADAY_EXTENDED&interval=" + interval
+            else:
+                raise ValueError("Please enter a valid interval")
+        
+        url = (
+            self.root_url
+            + "function=TIME_SERIES_" + function
+            + "&symbol="
+            + symbol.upper()
+            )
+
+        if kwargs.keys():
+            for arg, val in kwargs.items():
+                url += "&" + str(arg) + "=" + str(val)
+        url += "&apikey=" + self.api_key + "&datatype=json"
+
+        request = requests.get(url).json()
+        
+        data = []
+        
+        if period.lower() == "intraday":
+            for key, item in request["Time Series (" + interval + ")"].items():
+                observation = {}
+                observation["id"] = symbol
+                observation["date"] = key
+                for value in item:
+                    observation[value[3:]] = item[value]
+                data.append(observation)
+        else:
+            for key, item in request["Time Series (" + function.capitalize() + ")"].items():
+                observation = {}
+                observation["id"] = symbol
+                observation["date"] = key
+                for value in item:
+                    observation[value[3:]] = item[value]
+                data.append(observation)
+
+        return data
