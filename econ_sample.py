@@ -1,5 +1,6 @@
 """Libraries"""
 import pandas as pd
+import numpy as np
 import requests
 import plotly.express as px
 import econ_api
@@ -140,7 +141,7 @@ acs2019 = census.get_data(
 # Create dataframe
 df_acs2019 = pd.DataFrame(acs2019)
 df_acs2019["B03001_003E"] = pd.to_numeric(df_acs2019["B03001_003E"], errors="coerce")
-df_acs2019[df_acs2019["B03001_003E"] < 0] = pd.NA
+df_acs2019.loc[df_acs2019["B03001_003E"] < 0, "B03001_003E] = np.nan
 
 df_acs2019["FIPS"] = df_acs2019["state"] + df_acs2019["county"]
 
