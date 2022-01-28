@@ -1,7 +1,8 @@
 """
 Early work in progress.
-FRED API keys can be obtained from the website; to find, visit:
+FRED and Census API keys can be obtained for free; to obtain, visit:
 https://fred.stlouisfed.org/
+https://www.census.gov/data/developers.html
 
 Observation arguments
 
@@ -197,6 +198,7 @@ class Census(object):
         variables="",
         geographical_level="",
         geographies="",
+        **kwargs
     ):
 
         if "acs" in source:
@@ -214,10 +216,17 @@ class Census(object):
             geo = "for=" + geographical_level + ":" + geographies
         else:
             geo = "for=" + geographical_level + ":*"
+        kwarg = ""
+        if kwargs.keys():
+            for arg, val in kwargs.items():
+                if arg == "state":
+                    kwarg += "&in=" + str(arg) + ":" + str(val)
+                else:
+                    kwarg += "&" + str(arg) + "=" + str(val)
         if self.key is not None:
-            url = self.root_url + src + var + "&" + geo + "&key=" + self.key
+            url = self.root_url + src + var + "&" + geo + kwarg + "&key=" + self.key
         else:
-            url = self.root_url + src + var + "&" + geo
+            url = self.root_url + src + var + "&" + geo + kwarg
         request = requests.get(url).json()
 
         data = []
